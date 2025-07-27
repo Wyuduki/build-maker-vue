@@ -1,16 +1,18 @@
 /** functionのグループ(args, retを含む)出力． */
-export function logFunction(target: Function, context: ClassMethodDecoratorContext) {
-  return function (this: any, ...args: any[]) {
-    debugObject('logFunction args', target, context);
+export function logFunction(flagArgs: boolean = true, flagRet: boolean = true) {
+  return function (target: Function, context: ClassMethodDecoratorContext) {
+    return function (this: any, ...args: any[]) {
+      debugObject('logFunction args', target, context);
 
-    console.group('exec <' + context.name.toString() + '>');
-    if (args.length > 0) {
-      logObject({ args });
-    }
-    const ret = target.call(this, ...args);
-    if (ret != undefined) logObject({ ret });
-    console.groupEnd();
-    return ret;
+      console.group('exec <' + context.name.toString() + '>');
+      if (flagArgs && args.length > 0) {
+        logObject({ args });
+      }
+      const ret = target.call(this, ...args);
+      if (flagRet && ret != undefined) logObject({ ret });
+      console.groupEnd();
+      return ret;
+    };
   };
 }
 

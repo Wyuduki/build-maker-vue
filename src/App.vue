@@ -1,31 +1,20 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import Home from './components/Home.vue';
-import NotFound from './components/NotFound.vue';
-import SectionMaker from './components/SectionMaker/SectionMaker.vue';
+//:: view
 
-const routes: any = {
-  '/': Home,
-  '/sectionmaker': SectionMaker,
-};
-
-const currentPath = ref(window.location.hash);
-
-window.addEventListener('hashchange', () => {
-  currentPath.value = window.location.hash;
-});
-
-const currentView = computed(() => {
-  console.groupEnd();
-  console.group('page:' + (routes[currentPath.value.slice(1) || '/'] || NotFound).__name);
-  return routes[currentPath.value.slice(1) || '/'] || NotFound;
-});
+//:: vue
+import { RouterLink, RouterView } from 'vue-router';
+//:: tsClass
+//:: ts
+//:: constant
+//:: ref
+//:: variable
 </script>
 
 <template>
-  <a href="#/">Home</a> | <a href="#/sectionmaker">SectionMaker</a> |
-  <a href="#/non-existent-path">Broken Link</a>
-  <component :is="currentView" />
+  <nav>
+    <RouterLink to="/">Home</RouterLink>
+  </nav>
+  <RouterView />
 </template>
 
 <style scoped>

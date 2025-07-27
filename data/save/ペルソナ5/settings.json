@@ -1,0 +1,15 @@
+{
+  "FormList": {
+    "persona": [
+      { "key": "name", "text": { "need": true, "size": "medium" }, "img": { "need": false } },
+      {
+        "key": "nameEn",
+        "text": { "need": false },
+        "img": { "need": true, "path": "persona", "type": ".jpg" }
+      }
+    ],
+    "skill": [
+      { "key": "name", "text": { "need": true, "size": "medium" }, "img": { "need": false } }
+    ]
+  }
+}

@@ -1,30 +1,58 @@
 <script setup lang="ts">
+import AttributeUnit from '../BuildMaker/AttributeUnit.vue';
+import LogButton from '../common/LogButton.vue';
 import Attribute from '@/ts/Attribute';
 import Section from '@/ts/Section';
 
-const props = defineProps({
-  sections: Array<Section>,
+import { watch, toRaw } from 'vue';
+import { logObject } from '@/ts/logger';
+
+interface Props {
+  sections?: Array<Section>;
+  choices?: Array<any>;
+  imagePath?: string;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  sections: () => [],
+  choices: () => [],
+  imagePath: 'empty',
 });
+
+console.error('eeeeeeeee');
+watch(
+  () => props.sections,
+  (s) => {
+    logObject({ props_sections: s });
+  },
+  { deep: true },
+);
 
 console.log(props.sections);
 </script>
 
 <template>
+  <LogButton :keyValue="'sections'" :value="sections" />
   <div class="wrapper">
-    <section v-for="section in sections">
-      <h1 class="attribute-title">{{ section.name }}</h1>
-      <div class="attribute-box" v-for="attribute in section.attributes">
-        <div class="attribute-category">
-          <h2 class="attribute-name">{{ attribute.name }}</h2>
-          <p>{{ attribute.jsonKey }}</p>
-        </div>
-        <p class="attribute-unit" :class="attribute.size">具体名</p>
-        <img
-          v-if="attribute.img.need"
-          :style="{ width: attribute.img.width + 'px', height: attribute.img.height + 'px' }"
-          src=""
-        />
-      </div>
+    <section v-for="(section, index) in sections">
+      <h1 class="attribute-title">{{ section.name }} - {{ section.dataKey }}</h1>
+      <table>
+        <tr v-for="n in section.row">
+          <td v-for="m in section.column">
+            <div class="attribute-box" v-for="attribute in section.attributes">
+              <div class="attribute-category">
+                <h2 class="attribute-name">{{ attribute.name }}</h2>
+                <p>{{ attribute.jsonKey }}</p>
+              </div>
+              <AttributeUnit
+                :imagePath="imagePath"
+                :currentChoice="choices[index]?.[m - 1 + (n - 1) * section.column] || {}"
+                :attribute="attribute"
+              />
+            </div>
+          </td>
+        </tr>
+      </table>
     </section>
   </div>
 </template>

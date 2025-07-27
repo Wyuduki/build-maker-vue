@@ -1,111 +1,154 @@
 <script setup lang="ts">
-//import HelloWorld from './HelloWorld.vue';
-//import TheWelcome from './TheWelcome.vue';
+//:: view
 import Displaysections from './DisplaySection.vue';
-import Form from './Form.vue';
-import LogButton from '../common/logButton.vue';
+import DialogSection from './DialogSection.vue';
 import Mainmenu from './Mainmenu.vue';
-import { logFunction } from '../../ts/logger';
+import LogButton from '../common/LogButton.vue';
 
-import { ref, type Ref, useTemplateRef, type ShallowRef } from 'vue';
-
+//:: vue
+import { ref, type Ref } from 'vue';
+//:: tsClass
 import Section from './../../ts/Section';
 import Attribute from './../../ts/Attribute';
+//:: ts
+import { logFunction, logObject, debugObject } from '../../ts/logger';
+//:: constant
+/** dialogSectionを開くフラグ． */
+const flagDialogSection = ref(false);
+
+//:: ref
+const props = defineProps<{ projectName: string; dataName: string }>();
 
 /** すべてをまとめたデータ． */
 const sections: Ref<Section[]> = ref([]);
 
-const currentSection = ref();
+/** 更新対象のsection． */
+let currentSection: Ref<Section> = ref(new Section());
+
+const flagSectionListActive: Ref<boolean> = ref(false);
+//:: variable
+/** update or delete */
 let currentOp: string = '';
 
-/** formを包むdialogタグ． */
-const dialog = useTemplateRef('dialogRef');
-
-let isSectionListActive: Ref<boolean> = ref(true);
-
 class App {
-  /** formを開く． */
-  showDialog() {
-    dialog.value!.showModal();
-  }
-
-  /** Create Section */
-  createSection() {
+  /**
+   * @description 新規sectionを即座に作成し，dialogを開く．
+   */
+  @logFunction()
+  createSection(): void {
     currentSection.value = new Section();
-    console.debug(currentSection);
-    this.showDialog();
     sections.value.push(currentSection.value);
+    flagDialogSection.value = true;
+    logObject({ currentSection: currentSection.value });
   }
 
-  /** Update Section */
-  updateSection(index: number) {
+  /**
+   * @description 指定したsectionをdialogSectionに代入し，dialogSectionを開く．
+   * @param index 指定したsectionのインデックス．
+   */
+  @logFunction()
+  updateSection(index: number): void {
     currentSection.value = sections.value[index];
-    this.showDialog();
+    flagDialogSection.value = true;
+    logObject({ currentSection: currentSection.value });
   }
 
-  /** Delete Section */
-  deleteSection(index: number) {
+  /**
+   * @description 指定したsectionを即座に削除する．
+   * @param index 指定したsectionのインデックス．
+   */
+  @logFunction()
+  deleteSection(index: number): void {
     sections.value.splice(index, 1);
   }
 
-  @logFunction
-  setOp(op: string) {
+  @logFunction()
+  setOp(op: string): void {
     currentOp = op;
-    isSectionListActive.value = false;
+    flagSectionListActive.value = true;
   }
 
   /**  */
   judgeOp(index: number) {
-    isSectionListActive.value = true;
+    flagSectionListActive.value = false;
     if (currentOp == 'update') {
       this.updateSection(index);
     } else if (currentOp == 'delete') {
       this.deleteSection(index);
     }
   }
-}
-const app = new App();
 
-// 以下，デバッグ用．
-sections.value.push(new Section('example1', [new Attribute('attr1', 'key1')]));
-sections.value.push(
-  new Section('example2', [new Attribute('attr21', 'key21'), new Attribute('attr22', 'key22')]),
-);
-console.debug(sections.value);
+  applyInput(sect: Section) {
+    for (const key in sect) {
+      if (sect[key] == undefined) {
+        console.error('sectにundefinedの項目があります．');
+        continue;
+      }
+      currentSection.value[key] = sect[key];
+    }
+  }
+
+  @logFunction()
+  applyLoadSects(sects: Section[]) {
+    sections.value = [];
+    sects.forEach((sect) => {
+      sections.value.push(new Section().applyTo<Section>(sect, new Section()));
+    });
+    debugObject('sections', sections.value);
+  }
+}
+const sectionMaker = new App();
 </script>
 
 <template>
   <header>
+    <nav>
+      <RouterLink
+        :to="{ name: 'build-maker', params: { projectName: projectName, dataName: dataName } }"
+        >Build-Maker</RouterLink
+      >
+    </nav>
     <img alt="Vue logo" class="logo" src="./../../assets/logo.svg" width="125" height="125" />
     <LogButton keyValue="sections" :value="sections" />
-    <Mainmenu :sections="sections" @sbm="(sect) => (sections = sect)" />
-    <div class="wrapper">
-      <!--<HelloWorld msg="You did it!" />-->
-    </div>
+    <Mainmenu
+      :sections="sections"
+      :projectName="projectName"
+      @sbm="(sects) => sectionMaker.applyLoadSects(sects)"
+    />
+    <div class="wrapper"></div>
   </header>
 
+  <menu>
+    <!-- sectionに対する操作 -->
+    <li><button @click="sectionMaker.createSection()">作成</button></li>
+    <li>
+      <button @click="sectionMaker.setOp('update')">編集</button>
+    </li>
+    <li><button @click="sectionMaker.setOp('delete')">削除</button></li>
+  </menu>
+  <menu v-if="flagSectionListActive">
+    <!-- 各sectionの選択 -->
+    <li><button @click="flagSectionListActive = false">キャンセル</button></li>
+    <li v-for="(section, index) in sections">
+      <button @click="sectionMaker.judgeOp(index)">
+        {{ section.name }}
+      </button>
+    </li>
+  </menu>
   <main>
-    <menu>
-      <li><button @click="app.createSection()">作成</button></li>
-      <li>
-        <button @click="app.setOp('update')">編集</button>
-      </li>
-      <li><button @click="app.setOp('delete')">削除</button></li>
-    </menu>
-    <ul :class="{ none: isSectionListActive }">
-      <li><button @click="isSectionListActive = true">キャンセル</button></li>
-      <li v-for="(section, index) in sections">
-        <button @click="app.judgeOp(index)">
-          {{ section.name }}
-        </button>
-      </li>
-    </ul>
     <Displaysections :sections="sections" />
-    <!--<TheWelcome />-->
   </main>
-  <dialog ref="dialogRef">
-    <Form :currentSection="currentSection" @sbm="(sect) => (currentSection = sect)" />
-  </dialog>
+  <DialogSection
+    :flag="flagDialogSection"
+    :currentSection="currentSection"
+    @sbm="
+      (sect) => {
+        flagDialogSection = false;
+        sectionMaker.applyInput(sect);
+      }
+    "
+    @close="() => (flagDialogSection = false)"
+  />
 </template>
 
 <style scoped>

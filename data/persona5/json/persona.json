@@ -1,0 +1,74 @@
+[
+  {
+    "name": "ルシファー",
+    "week": [""],
+    "nameEn": "rushifa",
+    "id": "34889046"
+  },
+  {
+    "name": "マダ",
+    "week": ["氷結"],
+    "nameEn": "mada",
+    "id": "30339258"
+  },
+  {
+    "name": "サタン",
+    "week": [""],
+    "nameEn": "satan",
+    "id": "80542046"
+  },
+  {
+    "name": "オーディン",
+    "week": [""],
+    "nameEn": "odhin",
+    "id": "92569238"
+  },
+  {
+    "name": "ヴィシュヌ",
+    "week": ["火炎"],
+    "nameEn": "vishun",
+    "id": "10575821"
+  },
+  {
+    "name": "シュウ",
+    "week": ["核熱"],
+    "nameEn": "shu",
+    "id": "70612311"
+  },
+  {
+    "name": "アスラおう",
+    "week": ["念動"],
+    "nameEn": "asurao",
+    "id": "81464717"
+  },
+  {
+    "name": "メタトロン",
+    "week": ["電撃", "呪怨"],
+    "nameEn": "metatron",
+    "id": "77997705"
+  },
+  {
+    "name": "ベルゼブブ",
+    "week": ["祝福"],
+    "nameEn": "beruze",
+    "id": "20534825"
+  },
+  {
+    "name": "マリア",
+    "week": ["火炎"],
+    "nameEn": "maria",
+    "id": "46047712"
+  },
+  {
+    "name": "ヨシツネ",
+    "week": [""],
+    "nameEn": "yoshitsune",
+    "id": "45414668"
+  },
+  {
+    "name": "empty",
+    "week": ["empty"],
+    "nameEn": "empty",
+    "id": "-1"
+  }
+]

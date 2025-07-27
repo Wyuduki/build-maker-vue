@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "run-p type-check \"build-only {@}\" -- && npm run cp",
+    "build": "run-p type-check \"build-only {@}\" -- && npm run cp && npm run cpData",
     "cp": "xcopy .\\src\\php .\\dist\\php /S /I",
+    "cpData": "xcopy .\\data .\\dist\\data /S /I",
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
@@ -16,6 +17,7 @@
   "dependencies": {
     "axios": "^1.10.0",
     "vue": "^3.5.17",
+    "vue-router": "^4.5.1",
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
