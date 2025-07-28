@@ -1,11 +1,15 @@
 <script setup lang="ts">
+//:: view
 import AttributeUnit from '../BuildMaker/AttributeUnit.vue';
 import LogButton from '../common/LogButton.vue';
-import Attribute from '@/ts/Attribute';
-import Section from '@/ts/Section';
 
-import { watch, toRaw } from 'vue';
-import { logObject } from '@/ts/logger';
+//:: vue
+//:: tsClass
+import Section from '@/ts/Section';
+//:: ts
+//:: constant
+//:: ref
+//:: variable
 
 interface Props {
   sections?: Array<Section>;
@@ -18,17 +22,6 @@ const props = withDefaults(defineProps<Props>(), {
   choices: () => [],
   imagePath: 'empty',
 });
-
-console.error('eeeeeeeee');
-watch(
-  () => props.sections,
-  (s) => {
-    logObject({ props_sections: s });
-  },
-  { deep: true },
-);
-
-console.log(props.sections);
 </script>
 
 <template>

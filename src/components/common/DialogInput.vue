@@ -1,6 +1,5 @@
 <script setup lang="ts">
 //:: view
-
 //:: vue
 import { ref, watch, useTemplateRef } from 'vue';
 //:: tsClass

@@ -6,7 +6,7 @@ import Mainmenu from './Mainmenu.vue';
 import LogButton from '../common/LogButton.vue';
 
 //:: vue
-import { ref, type Ref } from 'vue';
+import { ref, toRaw, type Ref } from 'vue';
 //:: tsClass
 import Section from './../../ts/Section';
 import Attribute from './../../ts/Attribute';
@@ -86,6 +86,7 @@ class App {
       }
       currentSection.value[key] = sect[key];
     }
+    sections.value = structuredClone(toRaw(sections.value));
   }
 
   @logFunction()

@@ -1,35 +1,40 @@
 <script setup lang="ts">
+//:: view
 import LogButton from '../common/LogButton.vue';
-import FormList from './FormList.vue';
+import DialogList from './DialogList.vue';
 import SaveAs from '../common/SaveAs.vue';
 import Load from '../common/Load.vue';
-import AttributeUnit from './AttributeUnit.vue';
 import DisplaySection from '../SectionMaker/DisplaySection.vue';
-
+//:: vue
 import { ref, useTemplateRef } from 'vue';
-import { FetchData } from '@/ts/FetchData';
-import { debugObject } from '@/ts/logger';
+//:: tsClass
 import Section from '@/ts/Section';
-
-const props = defineProps<{ projectName: string; dataName: string }>();
+//:: ts
+import { debugObject } from '@/ts/logger';
+import { FetchData } from '@/ts/FetchData';
+//:: constant
+/** dialogSectionを開くフラグ． */
+const flagDialogList = ref(false);
 
 const fetch = new FetchData();
-const saveLoadPath = '\\..\\..\\data\\save\\' + props.projectName + '\\';
+//:: ref
+const props = defineProps<{ projectName: string; dataName: string }>();
 
 const lists = ref<Record<string, object[]>>({});
 
-const choices = ref<any[]>([]);
-
-const dialog = useTemplateRef('refDialog');
-
-const imagePath = '.\\..\\data\\' + props.dataName + '\\image\\';
-
 const sections = ref<Section[]>([]);
+const choices = ref<any[]>([]);
+/** choicesやlistsのインデックスになる． */
+const currentIndex = ref([0, 0]);
+
+const saveLoadPath = '\\..\\..\\data\\save\\' + props.projectName + '\\';
+const imagePath = '.\\..\\data\\' + props.dataName + '\\image\\';
+const listLoadPath = '\\..\\..\\data\\' + props.dataName + '\\json\\';
+//:: variable
+
+// sectionsの読み込み．
 fetch.fetchData('save', saveLoadPath, 'load', 'loadFile').then((r) => {
   sections.value = JSON.parse(r);
-  debugObject('sections', sections.value);
-
-  const listLoadPath = '\\..\\..\\data\\' + props.dataName + '\\json\\';
 
   // listsの読み込み．
   sections.value.forEach((section: Section) => {
@@ -41,10 +46,9 @@ fetch.fetchData('save', saveLoadPath, 'load', 'loadFile').then((r) => {
   for (let i = 0; i < sections.value.length; i++) {
     choices.value.push([]);
     for (let j = 0; j < sections.value[i].row * sections.value[i].column; j++) {
-      choices.value[i].push([]);
+      choices.value[i].push({});
     }
   }
-  debugObject('lists', lists.value);
 });
 
 let settings: { FormList: Record<string, object> };
@@ -52,11 +56,11 @@ fetch.fetchData('settings', saveLoadPath, 'load', 'loadFile').then((r) => {
   settings = JSON.parse(r);
 });
 
-//const choices = ref<Array<Array<any>>>([]);
-
-const currentIndex = ref([0, 0]);
-
 class BuildMaker {
+  /**
+   * @description 各リストのデフォルト要素（何も選ばれなかった場合）を作成する．
+   * @param list
+   */
   makeDefaultListElement(list: object[]) {
     const lastElement: Record<string, any> = list[list.length - 1];
     let newElement: Record<string, any> = {};
@@ -90,11 +94,12 @@ class BuildMaker {
     }
     list.push(newElement);
   }
+
   /** formを開く． */
   showDialog(index: number, index2: number) {
     currentIndex.value[0] = index;
     currentIndex.value[1] = index2;
-    dialog.value![index].showModal();
+    flagDialogList.value = true;
   }
 }
 
@@ -133,43 +138,25 @@ const buildMaker = new BuildMaker();
   </menu>
 
   <main class="wrapper">
-    <!--<section v-for="(section, index) in sections">
-      <h1 class="attribute-title">{{ section.name }}</h1>
-      <table>
-        <tr v-for="n in section.row">
-          <td v-for="m in section.column">
-            <div class="attribute-box" v-for="attribute in section.attributes">
-              <div class="attribute-category">
-                <h2 class="attribute-name">{{ attribute.name }}</h2>
-                <p>{{ attribute.jsonKey }}</p>
-              </div>
-              <AttributeUnit
-                :imagePath="imagePath || 'empty'"
-                :currentChoice="choices[index]?.[m - 1 + (n - 1) * section.column]"
-                :attribute="attribute"
-                />
-              </div>
-            </td>
-          </tr>
-        </table>
-      </section>-->
     <DisplaySection :sections="sections" :choices="choices" :imagePath="imagePath" />
   </main>
-  <dialog ref="refDialog" v-for="(list, key) in lists">
-    <FormList
-      :imagePath="imagePath || 'empty'"
-      :list="list"
-      :loadPath="saveLoadPath"
-      :setting="settings.FormList[key]"
-      :dataName="dataName"
-      @sbm="
-        (ret) => {
-          debugObject('ret', ret);
-          choices[currentIndex[0]][currentIndex[1]] = ret;
-        }
-      "
-    />
-  </dialog>
+  <DialogList
+    v-for="(list, key) in lists"
+    :flag="flagDialogList"
+    :imagePath="imagePath || 'empty'"
+    :list="list"
+    :loadPath="saveLoadPath"
+    :setting="settings.FormList[key]"
+    :dataName="dataName"
+    @sbm="
+      (ret) => {
+        debugObject('ret', ret);
+        choices[currentIndex[0]][currentIndex[1]] = ret;
+        flagDialogList = false;
+      }
+    "
+    @close="() => (flagDialogList = false)"
+  />
 </template>
 
 <style scoped>

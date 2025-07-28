@@ -35,7 +35,6 @@ class DialogSection {
     emit('sbm', localProps.value);
   }
 
-  //TODO: キャンセルボタン．
   eventClose(): void {
     dialog.value!.close();
     emit('close');

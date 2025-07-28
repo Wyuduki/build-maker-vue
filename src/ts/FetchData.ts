@@ -2,7 +2,7 @@ import axios from 'axios';
 import { logFunction } from './logger';
 
 export class FetchData {
-  //@logFunction()
+  @logFunction()
   async fetchData<T>(fileName: string, folderPath: string, php: string, data: T) {
     try {
       //エラーが発生する可能性のあるコードのブロックをtry、erroerで実行
