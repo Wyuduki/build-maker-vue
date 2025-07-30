@@ -1,6 +1,6 @@
 <script setup lang="ts">
 //:: view
-import Displaysections from './DisplaySection.vue';
+import Displaysections from '../common/DisplaySection.vue';
 import DialogSection from './DialogSection.vue';
 import Mainmenu from './Mainmenu.vue';
 import LogButton from '../common/LogButton.vue';
@@ -8,8 +8,7 @@ import LogButton from '../common/LogButton.vue';
 //:: vue
 import { ref, toRaw, type Ref } from 'vue';
 //:: tsClass
-import Section from './../../ts/Section';
-import Attribute from './../../ts/Attribute';
+import Section from '@/ts/Section';
 //:: ts
 import { logFunction, logObject, debugObject } from '../../ts/logger';
 //:: constant

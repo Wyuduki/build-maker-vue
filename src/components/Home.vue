@@ -7,6 +7,7 @@ import { ref } from 'vue';
 //:: tsClass
 import Project from '@/ts/Project';
 //:: ts
+import Path from '@/ts/Path';
 import { logFunction, logObject, debugObject } from '@/ts/logger';
 import { FetchData } from '@/ts/FetchData';
 

@@ -1,20 +1,31 @@
 <script setup lang="ts">
-import AttributeUnit from './AttributeUnit.vue';
+//:: view
+import AttributeUnit from '../common/AttributeUnit.vue';
 import LogButton from '../common/LogButton.vue';
+
+//:: vue
 import { ref, watch, useTemplateRef } from 'vue';
 import { type Ref } from 'vue';
-//import { logFunction } from './../logger.js';
+//:: tsClass
 import Attribute from '../../ts/Attribute';
-import Section from '../../ts/Section';
-import { logObject, debugObject } from '@/ts/logger';
+//:: ts
 import { FetchData } from '@/ts/FetchData';
-
-const dialog = useTemplateRef('refDialog');
-
-/** 受け取った引数。 */
+import { logObject, debugObject } from '@/ts/logger';
+//:: constant
 const fetch = new FetchData();
+const emit = defineEmits(['sbm', 'close']);
+const dialog = useTemplateRef('refDialog');
+/** 受け取った引数。 */
 const props = defineProps(['flag', 'imagePath', 'list', 'loadPath', 'setting']);
+//:: ref
+const currentChoice = ref();
+/** list要素の表示内容。 */
+const specialAttributes: Ref<any[]> = ref([]);
 
+//:: variable
+
+
+//TODO: 並び替え、絞り込みの追加。
 /** porpsを書き換えるのはできないので，ローカル変数に退避する． */
 let localProps = ref();
 watch(props, (p) => {
@@ -25,11 +36,7 @@ watch(props, (p) => {
   }
 });
 
-const currentChoice = ref();
 
-const emit = defineEmits(['sbm', 'close']);
-
-const specialAttributes: Ref<any[]> = ref([]);
 
 props.setting.forEach((element: any) => {
   specialAttributes.value.push(
@@ -44,23 +51,27 @@ props.setting.forEach((element: any) => {
   );
 });
 
-function eventSubmit(currentChoice: object) {
-  debugObject('FormList submit', currentChoice);
-  emit('sbm', currentChoice || props.list[props.list.length - 1]);
+class DialogList {
+  eventSubmit(currentChoice: object) {
+    debugObject('FormList submit', currentChoice);
+    emit('sbm', currentChoice || props.list[props.list.length - 1]);
+  }
+  
+  eventClose(): void {
+    dialog.value!.close();
+    emit('close');
+  }
 }
-
-function eventClose(): void {
-  dialog.value!.close();
-  emit('close');
-}
+const dialogList = new DialogList();
 </script>
 
 <template>
   <dialog ref="refDialog">
     <LogButton :key-value="'props'" :value="props" />
     <h1>FormList</h1>
-    <form method="dialog" @submit="eventSubmit(currentChoice)">
+    <form method="dialog" @submit="dialogList.eventSubmit(currentChoice)">
       <p>{{ currentChoice?.id }}</p>
+            <button @click="dialogList.eventClose" type="button">×</button>
       <button>保存</button>
       <button v-for="element in props.list" @click="currentChoice = element" type="button">
         <AttributeUnit

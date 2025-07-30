@@ -4,36 +4,41 @@ import LogButton from '../common/LogButton.vue';
 import DialogList from './DialogList.vue';
 import SaveAs from '../common/SaveAs.vue';
 import Load from '../common/Load.vue';
-import DisplaySection from '../SectionMaker/DisplaySection.vue';
+import DisplaySection from '../common/DisplaySection.vue';
 //:: vue
-import { ref, useTemplateRef } from 'vue';
+import { ref } from 'vue';
 //:: tsClass
 import Section from '@/ts/Section';
 //:: ts
-import { debugObject } from '@/ts/logger';
+import Path from '@/ts/Path';
+import { logObject, debugObject } from '@/ts/logger';
 import { FetchData } from '@/ts/FetchData';
 //:: constant
-/** dialogSectionを開くフラグ． */
-const flagDialogList = ref(false);
+const props = defineProps<{ projectName: string; dataName: string }>();
+Path.initialize(props.projectName, props.dataName);
+
+const imagePath = '.\\..\\data\\' + props.dataName + '\\image\\';
+const listLoadPath = '\\..\\..\\data\\' + props.dataName + '\\json\\';
 
 const fetch = new FetchData();
+
+/** settings.jsonの読み込み． */
+let settings: { FormList: Record<string, object> };
+logObject({ Path_setting: Path.setting });
+fetch.fetchData('settings', Path.setting, 'load', 'loadFile').then((r) => {
+  settings = JSON.parse(r);
+  logObject({ settings });
+});
 //:: ref
-const props = defineProps<{ projectName: string; dataName: string }>();
-
 const lists = ref<Record<string, object[]>>({});
-
 const sections = ref<Section[]>([]);
 const choices = ref<any[]>([]);
+
 /** choicesやlistsのインデックスになる． */
 const currentIndex = ref([0, 0]);
 
-const saveLoadPath = '\\..\\..\\data\\save\\' + props.projectName + '\\';
-const imagePath = '.\\..\\data\\' + props.dataName + '\\image\\';
-const listLoadPath = '\\..\\..\\data\\' + props.dataName + '\\json\\';
-//:: variable
-
 // sectionsの読み込み．
-fetch.fetchData('save', saveLoadPath, 'load', 'loadFile').then((r) => {
+fetch.fetchData('save', Path.build, 'load', 'loadFile').then((r) => {
   sections.value = JSON.parse(r);
 
   // listsの読み込み．
@@ -51,10 +56,12 @@ fetch.fetchData('save', saveLoadPath, 'load', 'loadFile').then((r) => {
   }
 });
 
-let settings: { FormList: Record<string, object> };
-fetch.fetchData('settings', saveLoadPath, 'load', 'loadFile').then((r) => {
-  settings = JSON.parse(r);
-});
+/** dialogSectionを開くフラグ． */
+const flagsDialogList = ref<Record<string, boolean>>({});
+for (const key in lists) {
+  flagsDialogList.value[key] = false;
+}
+//:: variable
 
 class BuildMaker {
   /**
@@ -95,11 +102,16 @@ class BuildMaker {
     list.push(newElement);
   }
 
-  /** formを開く． */
-  showDialog(index: number, index2: number) {
+  /**
+   * @descripton 指定したlistを開く。
+   * @param index リストのインデックス。
+   * @param index2 tableのインデックス。
+   * @param dataKey flagsDialogListのキー。
+   */
+  showDialog(index: number, index2: number, dataKey: string) {
     currentIndex.value[0] = index;
     currentIndex.value[1] = index2;
-    flagDialogList.value = true;
+    flagsDialogList.value[dataKey] = true;
   }
 }
 
@@ -120,9 +132,9 @@ const buildMaker = new BuildMaker();
   <LogButton keyValue="sections" :value="sections" />
   <LogButton keyValue="lists" :value="lists" />
   <LogButton keyValue="choices" :value="choices" />
-  <h2>{{ saveLoadPath }}</h2>
+  <h2>{{ Path.build }}</h2>
   <menu>
-    <li><SaveAs :path="saveLoadPath" :data="choices" /></li>
+    <li><SaveAs :path="Path.build" :data="choices" /></li>
     <li><Load @sbm="(val) => (choices = val)" /></li>
   </menu>
   <menu>
@@ -130,7 +142,7 @@ const buildMaker = new BuildMaker();
     <li v-for="(section, index) in sections">
       <button
         v-for="n in section.row * section.column"
-        @click="buildMaker.showDialog(index, n - 1)"
+        @click="buildMaker.showDialog(index, n - 1, section.dataKey)"
       >
         {{ section.name }}
       </button>
@@ -142,20 +154,19 @@ const buildMaker = new BuildMaker();
   </main>
   <DialogList
     v-for="(list, key) in lists"
-    :flag="flagDialogList"
+    :flag="flagsDialogList[key]"
     :imagePath="imagePath || 'empty'"
     :list="list"
-    :loadPath="saveLoadPath"
+    :loadPath="Path.build"
     :setting="settings.FormList[key]"
-    :dataName="dataName"
     @sbm="
       (ret) => {
         debugObject('ret', ret);
         choices[currentIndex[0]][currentIndex[1]] = ret;
-        flagDialogList = false;
+        flagsDialogList[key] = false;
       }
     "
-    @close="() => (flagDialogList = false)"
+    @close="() => (flagsDialogList[key] = false)"
   />
 </template>
 

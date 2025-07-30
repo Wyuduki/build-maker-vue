@@ -1,6 +1,6 @@
 <script setup lang="ts">
 //:: view
-import AttributeUnit from '../BuildMaker/AttributeUnit.vue';
+import AttributeUnit from './AttributeUnit.vue';
 import LogButton from '../common/LogButton.vue';
 
 //:: vue
